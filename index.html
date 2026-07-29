@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台股週末總覽</title>
+<style>
+:root {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --text: #1c1e21;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --up: #16a34a;
+  --down: #dc2626;
+  --accent: #2563eb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0 auto;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.6;
+  max-width: 1100px;
+}
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+.toc {
+  flex: 0 0 200px;
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.toc a {
+  display: block;
+  padding: 6px 10px;
+  margin-bottom: 2px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.toc a:hover { background: var(--card); color: var(--text); }
+.main {
+  flex: 1;
+  min-width: 0;
+  max-width: 720px;
+}
+h1 {
+  font-size: 22px;
+  margin: 8px 0 4px;
+}
+.meta {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.card h2 {
+  font-size: 17px;
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.card h3 {
+  font-size: 15px;
+  margin: 14px 0 6px;
+  color: var(--accent);
+}
+.card h4 {
+  font-size: 14px;
+  margin: 10px 0 4px;
+}
+.card ul {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+.card ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+.card li {
+  margin: 4px 0;
+  font-size: 14px;
+}
+.card li ul {
+  margin-top: 2px;
+}
+.card p {
+  font-size: 14px;
+  margin: 6px 0;
+}
+.up { color: var(--up); font-weight: 600; }
+.down { color: var(--down); font-weight: 600; }
+.badge {
+  display: inline-block;
+  background: #eef2ff;
+  color: var(--accent);
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  margin-left: 4px;
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 20px 0 8px;
+}
+strong { color: var(--text); }
+.hc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+}
+.hc-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.hc-card:hover { border-color: var(--accent); }
+.hc-card.risk-high { border-left: 4px solid var(--down); }
+.hc-card.risk-low { border-left: 4px solid var(--up); }
+.hc-card.risk-neutral { border-left: 4px solid var(--muted); }
+.hc-card .hc-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; display: block; }
+.hc-card .hc-tag { display: block; margin: 2px 0; line-height: 1.4; }
+.hc-card .hc-grades {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+  font-weight: 600;
+  color: var(--accent);
+}
+.hc-card .hc-levels {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.hc-more { margin-top: 10px; }
+.hc-more summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 0;
+}
+.hc-more[open] summary { margin-bottom: 4px; }
+.stock-chart-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px 4px;
+  margin: 8px 0 14px;
+}
+.chart-box { position: relative; width: 100%; height: 160px; margin-bottom: 10px; }
+.chart-box.chart-box-small { height: 90px; }
+.chart-box canvas { width: 100% !important; height: 100% !important; }
+.hc-dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  max-width: 480px;
+  width: 90vw;
+  color: var(--text);
+  background: var(--bg);
+}
+.hc-dialog::backdrop { background: rgba(0,0,0,0.5); }
+.hc-dialog h3 { margin: 0 0 8px; font-size: 16px; }
+.hc-dialog-close {
+  float: right;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.hc-dialog-tags { margin-bottom: 8px; }
+.hc-dialog-tags .hc-tag { display: block; margin: 2px 0; font-size: 12px; line-height: 1.4; }
+.hc-dialog-tags .hc-grades {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+  font-weight: 600;
+  color: var(--accent);
+}
+.hc-dialog-detail p { margin: 4px 0; font-size: 12px; }
+.hc-dialog-note { margin-top: 8px; font-size: 11px; color: var(--muted); }
+
+/* 三層響應式：桌面（左側完整側邊欄）／平板（側邊欄變窄但保留）／手機（側邊欄轉成頂部橫向捲動的chip列，
+   不是直接隱藏——Eric明確要求側邊欄要留著，只是要依平台調整大小/形狀，不能整個消失）。
+   這幾個media query故意放在CSS最後面——踩過的坑：放在檔案中段時，後面出現的.hc-grid等
+   無media條件的基礎規則，即使宣告在media query之後，只要選擇器優先度相同，
+   在CSS cascade裡還是會贏過寫在前面的media query，導致手機版覆寫完全沒生效。*/
+@media (max-width: 1023px) {
+  .toc { flex-basis: 150px; }
+  .toc a { font-size: 12px; padding: 5px 8px; }
+  .main { max-width: 100%; }
+}
+@media (max-width: 700px) {
+  .layout { display: block; }
+  .toc {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    overflow-x: auto;
+    max-height: none;
+    width: 100%;
+    gap: 6px;
+    padding: 8px 4px;
+    margin: 0 0 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .toc a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    margin-bottom: 0;
+    font-size: 14px;
+    padding: 7px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+}
+@media (max-width: 640px) {
+  /* 手機字級不能比桌面版小——之前這裡把字級往下調（body 15px、內文13px），
+     結果手機看起來反而比桌面還小，Eric反映過字太小，改成跟桌面同級或更大。 */
+  body { padding: 10px; font-size: 16px; }
+  h1 { font-size: 20px; }
+  .card { padding: 14px 16px; margin-bottom: 10px; }
+  .card h2 { font-size: 17px; }
+  .card h3 { font-size: 16px; }
+  .card p, .card li { font-size: 15px; }
+  .hc-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+  .hc-dialog { padding: 14px 16px; width: 94vw; max-width: none; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+<h1>台股週末總覽</h1>
+<div class="meta">產生時間：2026-09-12 10:00
+（週末簡化版：台股休市，只包含真的有新資訊的區塊，不重跑選股/健診/籌碼） ・ 2026-09-12 10:00</div>
+<div class="layout">
+<nav class="toc"><a href="#s0">🌐 國際局勢評估</a><a href="#s1">⚠️ 地緣政治風險快照</a><a href="#s2">📰 台股焦點新聞</a><a href="#s3">週末總覽：全球風險情緒與下週開盤前瞻</a></nav>
+<div class="main">
+<section class="card" id="s0"><h2>🌐 國際局勢評估</h2><ul>
+<li>影響分數：-0.19（中性）</li>
+<li>重要國際新聞：</li>
+<li>Ryanair boss O'Leary defends 'high-fare rapists' airlines remarks</li>
+<li>US prices remain high as fuel costs squeeze household budgets</li>
+<li>Interest rates could rise again across the world – here's why</li>
+<li>AI boom helps drive surprise UK growth in July</li>
+<li>I asked my husband to pay into my pension when we had a child - here's why</li>
+<li>Can Europe recharge its battery industry?</li>
+</ul></section><section class="card" id="s1"><h2>⚠️ 地緣政治風險快照（Polymarket，市場隱含機率）</h2><ul>
+<li>【台灣地緣風險】中國與台灣軍事衝突（2027年前）：<strong>7.1%</strong>（成交量 $3,347,412）</li>
+<li>【台灣地緣風險】中國封鎖台灣（2026年內）：<strong>3.8%</strong>（成交量 $358,448）</li>
+<li>【台灣政治穩定】賴清德提前下台（2026年底前）：<strong>3.8%</strong>（成交量 $105,800）</li>
+<li>【總經（資金流向）】2026年 Fed 降息次數：<strong>93.5%</strong>（成交量 $52,304,078）</li>
+</ul></section><section class="card" id="s2"><h2>📰 台股焦點新聞</h2><ul>
+<li>誰成升息風暴重災戶？台股本周跌最慘10檔 新代、華星光意外入列</li>
+<li>9月12日 五件財經大事搶先看</li>
+<li>16檔雙多績優生 喊衝 吸引法人青睞 躍市場優選</li>
+<li>台股周線翻黑 誰還能逆勢狂飆？10檔周漲逾2成 這檔一周暴衝50%</li>
+<li>台股外資狂砍 打46K 保衛戰 國家隊即刻救援 低接台積電、世芯等半導體股</li>
+<li>大摩降評大立光、玉晶光 指出估值偏離基本面</li>
+<li>股海自由行／AI 基礎建設 迎新一輪升級</li>
+<li>AI封裝下一棒看這檔？AMD FOPLP、博通CPO雙卡位　2027年迎量產關鍵期</li>
+</ul></section><section class="card" id="s3"><h2>週末總覽：全球風險情緒與下週開盤前瞻</h2><ul>
+<li>BTC-USD 週末至今：77266 <span class="up">▲ 698.20 (0.91%)</span>（加密貨幣24小時交易，當作風險偏好情緒的參考指標，不是台股的直接連動指標）</li>
+</ul>
+<p>週末全球風險情緒呈現謹慎偏多，BTC 微幅上揚 0.91% 顯示風險資產仍獲一定支撐，但國際新聞中燃料成本壓縮家庭預算、全球利率可能再度上升的訊息顯示通膨與緊縮風險未消。地緣政治方面，Polymarket 隱含機率顯示兩岸衝突或封鎖風險仍低（中國與台灣軍事衝突 2027 前僅 7%，封鎖 2026 年內 4%），賴清德提前下台機率亦低，反映市場對台海短期升溫預期有限；而 Fed 2026 年降息次數高達 93% 暗示市場預期未來貨幣政策將轉寬鬆，這是較為正面的總經訊號。投資人下週一開盤前應留意：一是美聯儲官員講話是否強化降息預期；二是觀察亞洲匯率與資金流向，尤其台幣匯價是否受美息預期影響；三是關注半導體與 AI 相關題材是否延續英國意外成長帶動的正向溢出效應；四是留意兩岸相關新聞面，雖風險機率低，但任何意外升級仍可能觸發避險情緒。總體而言，外部環境偏向</p>
+<hr />
+<p><em>本報告由 Hermes Agent 自動產生（週末簡化版）</em></p></section>
+<div class="footer">本報告由 Hermes Agent 自動產生，僅供參考，不構成投資建議</div>
+</div>
+</div>
+</body>
+</html>
